@@ -16,11 +16,18 @@ mongoose.connect(process.env.MONGO_URL)
 
 app.get('/item', handleGetPrompts);
 app.post('/item', handlePostPrompts);
-app.put('/item:id', handlePutPrompts);
-app.delete('/item:id', handleDeletePrompts);
+app.put('/item/:id', handlePutPrompts);
+app.delete('/item/:id', handleDeletePrompts);
 
 
 async function handleGetPrompts(req, res, next) {
+  verifyUser(req, async (err, user) => {
+    if (err) {
+      console.log(err);
+      res.send('invalid token');
+    } else {
+
+
     try {
         let queryObject = {}
         if (req.query.email) {
@@ -33,6 +40,9 @@ async function handleGetPrompts(req, res, next) {
         next(error);
         res.status(500).send('Error Getting Prompts');
     }
+
+  }
+});
     }
 
 
