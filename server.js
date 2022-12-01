@@ -7,6 +7,13 @@ const mongoose = require('mongoose');
 const Item = require('./models/itemModel');
 const verifyUser = require('./auth');
 
+const { Configuration, OpenAIApi } = require("openai");
+const configuration = new Configuration({
+ apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -16,8 +23,23 @@ mongoose.connect(process.env.MONGO_URL)
 
 app.get('/item', handleGetPrompts);
 app.post('/item', handlePostPrompts);
+app.post('/item/generate', handleGenerateImg);
 app.put('/item/:id', handlePutPrompts);
 app.delete('/item/:id', handleDeletePrompts);
+
+async function handleGenerateImg (req,res,next){
+  try {
+    const generatedImg = await openai.createImage({
+      prompt: req.body.prompt,
+      n: 1,
+      size: "256x256",
+    });
+    res.send(generatedImg.data);
+    } catch (error) {
+        next(error);
+        res.status(500).send('Error Generating Img');
+    }
+}
 
 
 async function handleGetPrompts(req, res, next) {
