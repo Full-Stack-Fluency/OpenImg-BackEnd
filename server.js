@@ -76,7 +76,7 @@ async function handleDeletePrompts(req, res, next) {
     try {
       console.log(req.params.id);
       await Item.findByIdAndDelete(req.params.id);
-      res.status(200).send('Item is Gone Forever <:O');
+      res.status(200).send('item is Gone Forever <:O');
     } catch (error) {
       next(error);
       res.status(500).send('Error Deleting Prompt');
