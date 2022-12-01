@@ -4,7 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const Item = require('./models/ItemModel');
+const Item = require('./models/itemModel');
 const verifyUser = require('./auth');
 
 const app = express();
