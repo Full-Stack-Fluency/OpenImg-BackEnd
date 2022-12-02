@@ -5,7 +5,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const Item = require('./models/itemModel');
-// const verifyUser = require('./auth.js');
+const verifyUser = require('./auth.js');
+const axios = require("axios");
 
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
@@ -33,7 +34,7 @@ async function handleGenerateImg(req, res, next) {
   try {
     const generatedImg = await openai.createImage({
       prompt: req.body.prompt,
-      n: 1,
+      n: 5,
       size: "256x256",
     });
     res.send(generatedImg.data);
@@ -46,15 +47,14 @@ async function handleGenerateImg(req, res, next) {
 
 async function handleGetPrompts(req, res, next) {
   // console.log(req.headers.authorization);
-  // verifyUser(req, async (err, user) => {
-  //   if (err) {
-  //     console.log(err);
-  //     res.send('invalid token');
-  //   } else {
-  //     console.log('look mother');
+  verifyUser(req, async (err, user) => {
+    if (err) {
+      console.log(err);
+      res.send('invalid token');
+    } else {
+      console.log('successful verification');
       try {
-        let queryObject = {}
-        console.log(queryObject);
+        const queryObject = {}
         if (req.query.email) {
           queryObject.userEmail = req.query.email;
         }
@@ -66,8 +66,8 @@ async function handleGetPrompts(req, res, next) {
         res.status(500).send('Error Getting Prompts');
       }
 
-  //   }
-  // });
+    }
+  });
 
 
 
@@ -77,7 +77,28 @@ async function handleGetPrompts(req, res, next) {
 
 async function handlePostPrompts(req, res, next) {
   try {
-    const newItem = await Item.create(req.body);
+    const sentObj = req.body;
+    console.log(sentObj.imgSrc);
+    let config = {
+      method: 'get',
+      url: "https://shot.screenshotapi.net/screenshot",
+      params: {
+        "token" :`${process.env.SCREENSHOT_API_KEY}`,
+        "url" : `${sentObj.imgSrc}`,
+        "width" : 256,
+        "height" : 256
+      }
+    }
+    const screenShot = await axios(config);
+    console.log(screenShot);
+    const objWithStableSrc = {
+      prompt: sentObj.prompt,
+      userEmail: sentObj.userEmail,
+      imgSrc: screenShot.data.screenshot
+    }
+    console.log(objWithStableSrc);
+    // const newObj =  {sentObj.imgSrc:  }
+    const newItem = await Item.create(objWithStableSrc);
     res.send(newItem);
 
   } catch (error) {
@@ -102,7 +123,7 @@ async function handlePutPrompts(req, res, next) {
 
 async function handleDeletePrompts(req, res, next) {
   try {
-    console.log(req.params.id);
+    // console.log(req.params.id);
     await Item.findByIdAndDelete(req.params.id);
     res.status(200).send('item is Gone Forever <:O');
   } catch (error) {
