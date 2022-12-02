@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const Item = require('./models/itemModel');
-// const verifyUser = require('./auth');
+// const verifyUser = require('./auth.js');
 
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
@@ -18,8 +18,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 const PORT = process.env.PORT || 3002;
 mongoose.connect(process.env.MONGO_URL)
+
 
 app.get('/item', handleGetPrompts);
 app.post('/item', handlePostPrompts);
@@ -43,17 +45,18 @@ async function handleGenerateImg(req, res, next) {
 
 
 async function handleGetPrompts(req, res, next) {
+  // console.log(req.headers.authorization);
   // verifyUser(req, async (err, user) => {
   //   if (err) {
   //     console.log(err);
   //     res.send('invalid token');
   //   } else {
-
-
+  //     console.log('look mother');
       try {
         let queryObject = {}
+        console.log(queryObject);
         if (req.query.email) {
-          queryObject.email = req.query.email;
+          queryObject.userEmail = req.query.email;
         }
         let results = await Item.find(queryObject);
         res.status(200).send(results);
@@ -63,9 +66,12 @@ async function handleGetPrompts(req, res, next) {
         res.status(500).send('Error Getting Prompts');
       }
 
-    }
+  //   }
   // });
-// };
+
+
+
+}
 
 
 
