@@ -35,7 +35,7 @@ async function handleGenerateImg(req, res, next) {
     const generatedImg = await openai.createImage({
       prompt: req.body.prompt,
       n: 5,
-      size: "256x256",
+      size: "512x512",
     });
     res.send(generatedImg.data);
   } catch (error) {
@@ -60,25 +60,18 @@ async function handleGetPrompts(req, res, next) {
         }
         let results = await Item.find(queryObject);
         res.status(200).send(results);
-
       } catch (error) {
         next(error);
         res.status(500).send('Error Getting Prompts');
       }
-
     }
   });
-
-
-
 }
-
 
 
 async function handlePostPrompts(req, res, next) {
   try {
     const sentObj = req.body;
-    console.log(sentObj.imgSrc);
     let config = {
       method: 'get',
       url: "https://shot.screenshotapi.net/screenshot",
@@ -90,17 +83,13 @@ async function handlePostPrompts(req, res, next) {
       }
     }
     const screenShot = await axios(config);
-    console.log(screenShot);
     const objWithStableSrc = {
       prompt: sentObj.prompt,
       userEmail: sentObj.userEmail,
       imgSrc: screenShot.data.screenshot
     }
-    console.log(objWithStableSrc);
-    // const newObj =  {sentObj.imgSrc:  }
     const newItem = await Item.create(objWithStableSrc);
     res.send(newItem);
-
   } catch (error) {
     next(error);
     res.status(500).send('Error Creating Item');
@@ -108,18 +97,34 @@ async function handlePostPrompts(req, res, next) {
 }
 
 
-
 async function handlePutPrompts(req, res, next) {
   try {
+    const sentObj = req.body;
+    let config = {
+      method: 'get',
+      url: "https://shot.screenshotapi.net/screenshot",
+      params: {
+        "token" :`${process.env.SCREENSHOT_API_KEY}`,
+        "url" : `${sentObj.imgSrc}`,
+        "width" : 256,
+        "height" : 256
+      }
+    }
+    const screenShot = await axios(config);
+    const objWithStableSrc = {
+      prompt: sentObj.prompt,
+      userEmail: sentObj.userEmail,
+      imgSrc: screenShot.data.screenshot
+    }
     let id = req.params.id;
-    let updatedItemData = req.body;
-    let updatedItem = await Item.findByIdAndUpdate(id, updatedItemData, { new: true, overwrites: true });
+    let updatedItem = await Item.findByIdAndUpdate(id, objWithStableSrc, { new: true, overwrites: true });
     res.status(200).send(updatedItem);
   } catch (error) {
     next(error);
     res.status(500).send('Error Updating Prompt');
   }
 }
+
 
 async function handleDeletePrompts(req, res, next) {
   try {
