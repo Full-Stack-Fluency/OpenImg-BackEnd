@@ -27,6 +27,7 @@ mongoose.connect(process.env.MONGO_URL)
 app.get('/item', handleGetPrompts);
 app.post('/item', handlePostPrompts);
 app.post('/item/generate', handleGenerateImg);
+app.post('/item/emotion', handleGetImgEmotion);
 app.put('/item/:id', handlePutPrompts);
 app.delete('/item/:id', handleDeletePrompts);
 
@@ -42,6 +43,31 @@ async function handleGenerateImg(req, res, next) {
     next(error);
     res.status(500).send('Error Generating Img');
   }
+}
+//     data: {"url": req.body.url}
+async function handleGetImgEmotion (req,res,next) {
+  //
+   const dataUrl =  req.body.url;
+  // const dataUrl = "https://i.imgur.com/tGTPg1E.png"
+  console.log(dataUrl);
+  
+  const options = {
+    method: 'POST',
+    url: 'https://emotion-detection2.p.rapidapi.com/emotion-detection',
+    headers: {
+      'content-type': 'application/json',
+      'X-RapidAPI-Key': ` ${process.env.EMOTION_API_KEY}`,
+      'X-RapidAPI-Host': 'emotion-detection2.p.rapidapi.com'
+    },
+    data: {"url":dataUrl}
+  };
+  console.log(options);
+  axios.request(options).then(function (response) {
+    console.log(response.data);
+    res.send(response.data)
+  }).catch(function (error) {
+    console.error(error);
+});
 }
 
 
