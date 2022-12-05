@@ -33,14 +33,26 @@ app.delete('/item/:id', handleDeletePrompts);
 
 async function handleGenerateImg(req, res, next) {
   try {
+    console.log(typeof req.body.prompt);
+    const ModeratedPrompt = await openai.createModeration({
+      input: req.body.prompt,
+    });
+    console.log(typeof ModeratedPrompt.data.results[0].flagged);
+    if (ModeratedPrompt.data.results[0].flagged === false) {
+    console.log('generating image');
     const generatedImg = await openai.createImage({
       prompt: req.body.prompt,
       n: 5,
       size: "256x256",
     });
     res.send(generatedImg.data);
+  } else {
+    console.log('prompt flagged')
+    res.send(ModeratedPrompt.data.results[0].flagged);
+  }
   } catch (error) {
     next(error);
+    // console.log(error);
     res.status(500).send('Error Generating Img');
   }
 }
@@ -56,7 +68,8 @@ async function handleGetImgEmotion (req,res,next) {
     url: 'https://emotion-detection2.p.rapidapi.com/emotion-detection',
     headers: {
       'content-type': 'application/json',
-      'X-RapidAPI-Key': ` ${process.env.EMOTION_API_KEY}`,
+      'X-RapidAPI-Key': ` ${process.env.
+        EMOTION_API_KEY}`,
       'X-RapidAPI-Host': 'emotion-detection2.p.rapidapi.com'
     },
     data: {"url":dataUrl}
