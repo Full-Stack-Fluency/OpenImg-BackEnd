@@ -39,17 +39,17 @@ async function handleGenerateImg(req, res, next) {
     });
     console.log(typeof ModeratedPrompt.data.results[0].flagged);
     if (ModeratedPrompt.data.results[0].flagged === false) {
-    console.log('generating image');
-    const generatedImg = await openai.createImage({
-      prompt: req.body.prompt,
-      n: 5,
-      size: "256x256",
-    });
-    res.send(generatedImg.data);
-  } else {
-    console.log('prompt flagged')
-    res.send(ModeratedPrompt.data.results[0].flagged);
-  }
+      console.log('generating image');
+      const generatedImg = await openai.createImage({
+        prompt: req.body.prompt,
+        n: 4,
+        size: "256x256",
+      });
+      res.send(generatedImg.data);
+    } else {
+      console.log('prompt flagged')
+      res.send(ModeratedPrompt.data.results[0].flagged);
+    }
   } catch (error) {
     next(error);
     // console.log(error);
@@ -57,12 +57,12 @@ async function handleGenerateImg(req, res, next) {
   }
 }
 //     data: {"url": req.body.url}
-async function handleGetImgEmotion (req,res,next) {
+async function handleGetImgEmotion(req, res, next) {
   //
-   const dataUrl =  req.body.url;
+  const dataUrl = req.body.url;
   // const dataUrl = "https://i.imgur.com/tGTPg1E.png"
   console.log(dataUrl);
-  
+
   const options = {
     method: 'POST',
     url: 'https://emotion-detection2.p.rapidapi.com/emotion-detection',
@@ -72,7 +72,7 @@ async function handleGetImgEmotion (req,res,next) {
         EMOTION_API_KEY}`,
       'X-RapidAPI-Host': 'emotion-detection2.p.rapidapi.com'
     },
-    data: {"url":dataUrl}
+    data: { "url": dataUrl }
   };
   console.log(options);
   axios.request(options).then(function (response) {
@@ -80,7 +80,7 @@ async function handleGetImgEmotion (req,res,next) {
     res.send(response.data)
   }).catch(function (error) {
     console.error(error);
-});
+  });
 }
 
 
