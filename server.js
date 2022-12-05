@@ -42,7 +42,7 @@ async function handleGenerateImg(req, res, next) {
     console.log('generating image');
     const generatedImg = await openai.createImage({
       prompt: req.body.prompt,
-      n: 5,
+      n: 4,
       size: "256x256",
     });
     res.send(generatedImg.data);
