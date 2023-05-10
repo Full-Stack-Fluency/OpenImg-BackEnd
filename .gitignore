@@ -114,3 +114,4 @@ $RECYCLE.BIN/
 /test-results/
 /playwright-report/
 /playwright/.cache/
+playwright.config.js
