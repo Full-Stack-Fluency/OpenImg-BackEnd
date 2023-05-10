@@ -1,37 +1,37 @@
 'use strict';
 
-// jwt = JSON web token (also pronounced Jot);
 const jwt = require('jsonwebtoken');
-
-// jwks = JSON Web Key Set (also pronounced Ja-wicks)
 const jwksClient = require('jwks-rsa');
-
-// the jwksUri comesd from your Auth0 account page (the "key page"). Account Page -> advanced settings -> Endpoints -> 0auth -> JSON Web Key Set
 const client = jwksClient({
-  jwksUri: process.env.JWKS_URI
+  jwksUri: process.env.JWKS_URI,
 });
 
-// getkewy function to make things work
-// this comes from the jsonwebtoken docs
-// https://www.npmjs.com/package/jsonwebtoken (search for auth0)
-function getKey(header, callback) {
-  client.getSigningKey(header.kid, function(err, key) {
-    const signingKey = key.publicKey || key.rsaPublicKey;
-    callback(null, signingKey);
+const getKey = (header) => {
+  return new Promise((resolve, reject) => {
+    client.getSigningKey(header.kid, (err, key) => {
+      if (err) {
+        reject(err);
+      } else {
+        const signingKey = key.publicKey || key.rsaPublicKey;
+        resolve(signingKey);
+      }
+    });
   });
-}
+};
 
-// we need to verfy that the user on our route is who they say
-function verifyUser(req, errorFirstOrUserCallbackFunction) {
+const verifyUser = async (req, res, next) => {
   try {
-    // extract the token from the user's request
     const token = req.headers.authorization.split(' ')[1];
-    // console.log(token);
-    // from jsonwebtoken docs
-    jwt.verify(token, getKey, {}, errorFirstOrUserCallbackFunction)
-  } catch(error) {
-    errorFirstOrUserCallbackFunction('not authorized');
+    const decoded = await jwt.decode(token, { complete: true });
+    const header = decoded.header;
+    const key = await getKey(header);
+    const options = { algorithms: ['RS256'] };
+    await jwt.verify(token, key, options);
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(401).send('Unauthorized');
   }
-}
+};
 
 module.exports = verifyUser;

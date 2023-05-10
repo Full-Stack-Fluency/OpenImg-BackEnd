@@ -1,13 +1,42 @@
-'use strict'
+'use strict';
 
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
-const ItemSchema = new Schema ({
-    prompt:{type: String, required: true},
-    userEmail:{type: String, required: true},
-    imgSrc:{type: String, required: true}
+require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
 });
 
-const ItemModel = mongoose.model('Item', ItemSchema);
+const ItemModel = require('./models/itemModel');
 
-module.exports = ItemModel;
+async function seed() {
+  try {
+    const items = [
+      {
+        prompt: 'Test Prompt',
+        userEmail: 'test@gmail.com',
+        imgSrc: 'https://i.imgur.com/yg4HTGN.png',
+      },
+      {
+        prompt: 'Test Prompt 2',
+        userEmail: 'test2@gmail.com',
+        imgSrc: 'https://i.imgur.com/yg4HTGN.png',
+      },
+      {
+        prompt: 'Test Prompt 3',
+        userEmail: 'test3@gmail.com',
+        imgSrc: 'https://i.imgur.com/yg4HTGN.png',
+      },
+    ];
+    const createdItems = await ItemModel.create(items);
+    console.log(`Seeded ${createdItems.length} items`);
+    mongoose.connection.close();
+  } catch (error) {
+    console.error(error);
+    mongoose.connection.close();
+  }
+}
+
+seed();

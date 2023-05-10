@@ -111,3 +111,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 # End of https://www.gitignore.io/api/node,linux,macos,windows,visualstudiocode
+/test-results/
+/playwright-report/
+/playwright/.cache/
