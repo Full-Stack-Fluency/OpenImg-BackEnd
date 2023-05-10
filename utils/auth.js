@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
+const jwt = require("jsonwebtoken");
+const jwksClient = require("jwks-rsa");
 const client = jwksClient({
   jwksUri: process.env.JWKS_URI,
 });
@@ -21,16 +21,16 @@ const getKey = (header) => {
 
 const verifyUser = async (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(' ')[1];
+    const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.decode(token, { complete: true });
     const header = decoded.header;
     const key = await getKey(header);
-    const options = { algorithms: ['RS256'] };
+    const options = { algorithms: ["RS256"] };
     await jwt.verify(token, key, options);
     next();
   } catch (error) {
     console.error(error);
-    res.status(401).send('Unauthorized');
+    res.status(401).send("Unauthorized");
   }
 };
 
